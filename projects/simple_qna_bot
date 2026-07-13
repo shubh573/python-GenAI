@@ -1,0 +1,27 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+import streamlit as slt
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+
+llm = ChatGoogleGenerativeAI(model = "gemini-2.5-flash")
+
+slt.title("AskBuddy AI QnA Bot")
+slt.markdown("QnA Bot with LangChain and Google Gemini !")
+
+if "message" not in slt.session_state:
+    slt.session_state.message = []
+
+for message in slt.session_state.message:
+    role = message["role"]
+    content = message["content"]
+    slt.chat_message(role).markdown(content)
+
+query = slt.chat_input("Ask anything ?")
+if query:
+    slt.session_state.message.append({"role":"user","content":query})
+    slt.chat_message("user").markdown(query)
+    response = llm.invoke(query)
+    slt.chat_message("bot").markdown(response.content)
+    slt.session_state.message.append({"role":"bot","content":response.content})
